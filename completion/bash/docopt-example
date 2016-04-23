@@ -1,0 +1,59 @@
+#!/bin/bash
+#
+# bash completion, based on docker/contrib/completion/bash/docker
+
+__docopt_example_previous_extglob_setting=$(shopt -p extglob)
+shopt -s extglob
+
+_docopt_example_docopt_example() {
+    COMPREPLY=( $(compgen -W "${commands[*]}" -- "$cur") )
+}
+
+_docopt_example_subcommand_without_argument() {
+    COMPREPLY=( )
+}
+
+_docopt_example_subcommand_with_argument() {
+    # Construct your completion list dynamically here
+    local completions="thing1 thing2 thing3"
+    COMPREPLY=( $(compgen -W "$completions" -- "$cur") )
+}
+
+_docopt_example() {
+    local previous_extglob_setting=$(shopt -p extglob)
+    shopt -s extglob
+
+    local commands=(
+        subcommand_without_argument
+        subcommand_with_argument
+    )
+
+    COMPREPLY=()
+    local cur prev words cword
+    _get_comp_words_by_ref -n : cur prev words cword
+
+    local command='docopt_example' command_pos=0
+    local counter=1
+    while [ $counter -lt $cword ]; do
+      case "${words[$counter]}" in
+          *)
+              command="${words[$counter]}"
+              command_pos=$counter
+              break
+              ;;
+      esac
+      (( counter++ ))
+    done
+
+    local completions_func=_docopt_example_${command}
+
+    declare -F $completions_func >/dev/null && $completions_func
+
+    eval "$previous_extglob_setting"
+    return 0
+}
+
+eval "$__docopt_example_previous_extglob_setting"
+unset __docopt_example_previous_extglob_setting
+
+complete -F _docopt_example docopt-example
