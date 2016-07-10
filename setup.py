@@ -16,7 +16,7 @@ setup(
     install_requires=['docopt'],
     entry_points={
         'console_scripts': [
-            'docopt-example = app.main:main',
+            'docopt-example = app.cli:main',
         ],
     },
 )

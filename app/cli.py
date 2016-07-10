@@ -1,50 +1,54 @@
-"""
-Based on docker-compose.
-"""
-from inspect import getdoc
+import os
+import sys
 
-from docopt import docopt
-from docopt import DocoptExit
+from app.cli_dispatch import Dispatcher
 
 
-class Dispatcher(object):
+class Command(object):
+    """
+    Docopt example with subcommands.
 
-    def __init__(self, command, options):
-        self.command = command
-        self.options = options
+    Usage:
+      docopt-example [options] [COMMAND] [ARGS...]
+      docopt-example -h|--help
 
-    def parse(self, argv):
-        command_doc = getdoc(self.command)
-        command_options = _docopt(command_doc, argv, **self.options)
-        sub_command = command_options['COMMAND']
+    Options:
+      -v, --version                 Print version and exit
 
-        if sub_command is None:
-            raise SystemExit(command_doc)
+    Commands:
+      subcommand_without_argument   Do something
+      subcommand_with_argument      Do something else
+    """
 
-        sub_command_handler = getattr(self.command, sub_command)
-        sub_command_doc = getdoc(sub_command_handler)
+    def subcommand_without_argument(self):
+        """
+        List projects.
 
-        if sub_command_doc is None:
-            raise NoSuchCommand(sub_command, self)
+        Usage:
+          subcommand_without_arguments
+        """
+        print('Executing subcommand_without_argument')
 
-        sub_command_options = _docopt(
-            sub_command_doc,
-            command_options['ARGS'],
-            options_first=True,
-        )
-        return sub_command_options, sub_command_handler, command_options
+    def subcommand_with_argument(self):
+        """
+        Switch to a project
 
-
-def _docopt(doc, *args, **kwargs):
-    try:
-        return docopt(doc, *args, **kwargs)
-    except DocoptExit:
-        raise SystemExit(doc)
+        Usage:
+          subcommand_with_argument [THING]
+        """
+        print('Executing subcommand_with_argument')
 
 
-class NoSuchCommand(Exception):
-    def __init__(self, command, supercommand):
-        super(NoSuchCommand, self).__init__("No such command: %s" % command)
+def get_version_info():
+    file = os.path.join(os.path.dirname(__file__), 'version.txt')
+    return open(file).read().strip()
 
-        self.command = command
-        self.supercommand = supercommand
+
+def main():
+    dispatcher = Dispatcher(
+        Command(),
+        {'options_first': True, 'version': get_version_info()})
+
+    options, handler, command_options = dispatcher.parse(sys.argv[1:])
+
+    handler()
