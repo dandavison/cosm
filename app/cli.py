@@ -22,7 +22,7 @@ class Command(object):
 
     def subcommand_without_argument(self):
         """
-        List projects.
+        Do something that doesn't require an argument.
 
         Usage:
           subcommand_without_arguments
@@ -31,7 +31,7 @@ class Command(object):
 
     def subcommand_with_argument(self):
         """
-        Switch to a project
+        Do something that requires an argument.
 
         Usage:
           subcommand_with_argument [THING]
